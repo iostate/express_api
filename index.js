@@ -11,42 +11,52 @@ app.post('/hello', function(req, res) {
 	res.send("You just called the post method at '/hello'!");
 });
 
-// RegExp is an object that describes a pattern of characters
-// Use the RegExp function with changing parameters
-// for the different URLs
-// var re = new RegExp('ab+c');
 
+// Pattern for detecting the numbers [0,9]
+// 0 and 9 being inclusive
+var numberPattern = /^\d+$/;
+
+// Use the RegExp test method in order to see if a string contains
+// only alphabetical letters
+var stringPattern = /^[a-zA-Z]+$/;
 
 /**
- * Returns true if the value contains only numbers.
- * @param {*} value 
+ * 
+ * @param {*} value Value of the url parameter
+ * @param {*} type Property type of the url parameter. As in, id or name.
+ * 								 Depends on the API route.
  */
-function checkIfNumber(value) {
-	return /^\d+$/.test(value);
+function checkValidityOfParam(value, type) {
+	var result = false;
+	
+	if (type == 'id') {
+		 result = numberPattern.test(value);
+	} else if (type == 'name') {
+		result = stringPattern.test(value);
+	}
+	return result;
 }
 
-// ID AND NAME
+// GET ID AND NAME
 
 app.get('/:id/:name', function(req, res) {
-
 	// the id parameter
 	var id = req.params.id;
 
 	// the name parameter
 	var name = req.params.name;
 
-	// Pattern for detecting the numbers [0,9]
-	// 0 and 9 being inclusive
-	var numberPattern = /[0-9]/g;
+
+		// Test newly created fn that tests validity of the name and param
+		console.log('id is valid = ');
+		console.log(checkValidityOfParam(id, 'id'));
+		console.log('name is valid = ' );
+		console.log(checkValidityOfParam(name, 'name'));
 
 	// Pattern match the id variable with numberPattern
 	var numberPatternResult = id.match(numberPattern);
 	var errors = {};
 	var errorFlag = false;
-
-	// Use the RegExp test method in order to see if a string contains
-	// only alphabetical letters
-	var stringPattern = /^[a-zA-Z]+$/;
 
 	// If the id url parameter contains anything but numbers,
 	// then add an id error message property to the errors object.
@@ -54,7 +64,7 @@ app.get('/:id/:name', function(req, res) {
 	// numbers, i simply checked the length of the number pattern matching 
 	// array to the length of the id. if they are the same, then that means
 	// the id is a valid number
-	if (id.length  !== numberPatternResult.length) {
+	if (!checkValidityOfParam(id, 'id')) {
 		errors.idErrorMsg = req.params.id + ' must contain only numbers!\n';
 		errorFlag = true;
 		console.log('id contains something other than numbers!!');
@@ -62,7 +72,7 @@ app.get('/:id/:name', function(req, res) {
 
 	// If the URL parameter contains characters other than letters,
 	// then add a name error message property to the errors object
-	if (stringPattern.test(name) == false) {
+	if (!checkValidityOfParam(name, 'name')) {
 		errors.nameErrorMsg = req.params.name + ' must contain only letters not numbers!\n';
 		errorFlag = true;
 		console.log('name contains something other than alphabetical letters!');
